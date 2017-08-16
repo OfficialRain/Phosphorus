@@ -15,7 +15,7 @@ namespace Phosphorus
         static Random RandomEngine = new Random();
 
 		/// <summary>
-		/// Initializes console commands. The constructor for <see cref="ConsoleCommand"/> adds itself to a list of triggers.
+		/// Initializes console commands. The constructor for <see cref="ConsoleCommand"/> adds itself to a list of ConsoleCommands.
 		/// </summary>
 		public static void InitializeConsoleCommands()
         {
