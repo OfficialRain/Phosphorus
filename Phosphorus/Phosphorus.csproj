@@ -3,6 +3,27 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <StartupObject>Phosphorus.Program</StartupObject>
+    <RepositoryUrl>https://github.com/Reflectron/Phosphorus</RepositoryUrl>
+    <Version>3.0.0</Version>
+    <Description>Discord bot written in C# and runs on .NET Core</Description>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
+    <Authors>Reflectron</Authors>
+    <Company />
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CoreCompat.System.Drawing" Version="1.0.0-beta006" />
+    <PackageReference Include="Discord.Net" Version="1.0.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.3.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="2.3.1" />
+    <PackageReference Include="NinjaNye.SearchExtensions" Version="2.2.0" />
+  </ItemGroup>
 
 </Project>
