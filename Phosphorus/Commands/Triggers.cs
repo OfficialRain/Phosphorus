@@ -5,13 +5,16 @@ namespace Phosphorus
 {
     public static class Triggers
     {
+		/// <summary>
+		/// Initializes Triggers. The constructor for <see cref="Trigger"/> adds itself to a list of triggers.
+		/// </summary>
         public static void InitializeTriggers()
         {
             Trigger CuntTrigger = new Trigger()
             {
                 Key = "cunt",
                 Response = "r00d {user}",
-                SearchType = TriggerSearchType.SearchFor
+                SearchType = TriggerSearchType.Contains
             };
             Trigger BrandonsPhoneNumberTrigger = new Trigger()
             {
@@ -35,7 +38,7 @@ namespace Phosphorus
             {
                 Key = "call of duty",
                 Response = "did you mean \"cancer\"? {user}",
-                SearchType = TriggerSearchType.SearchFor
+                SearchType = TriggerSearchType.Contains
             };
 
         }

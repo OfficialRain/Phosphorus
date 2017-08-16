@@ -10,6 +10,11 @@ namespace Phosphorus
 {
     public partial class Tools
     {
+		/// <summary>
+		/// Splits a message into seperate parameters to be parsed by commands.
+		/// </summary>
+		/// <param name="message">The message to split into a string array</param>
+		/// <returns></returns>
         public static string[] GetArgs(string message)
         {
             if (!message.Contains(" "))
@@ -28,13 +33,20 @@ namespace Phosphorus
                         templist.Add(item.Substring(message.IndexOf(' ')).Split(',')[0].Replace(",", string.Empty).Trim());
                     }
 
-
+					
                 }
 
                 return templist.ToArray();
             }
         }
 
+		/// <summary>
+		/// Advanced user search.
+		/// </summary>
+		/// <param name="identifiers">List of strings to query in the user database.</param>
+		/// <param name="repeat">If set to true, multiple instances of users from different guilds will be included in the return list.</param>
+		/// <param name="exact"> If set to true, only the first match will be returned. </param>
+		/// <returns>Returns a list of <see cref="IUser"/>.</returns>
         public static List<IUser> GetUser(List<string> identifiers, bool repeat, bool exact)
         {
             List<IUser> users = new List<IUser>();
@@ -48,7 +60,7 @@ namespace Phosphorus
 
             foreach (var item in identifiers)
             {
-                var result = allusers.Search(x => GetNicknameOrUsername(x as SocketGuildUser).ToLower(), x => x.Username.ToLower())
+                var result = allusers.Search(x => GetDisplayName(x as SocketGuildUser).ToLower(), x => x.Username.ToLower())
                     .Containing(item.ToLower());
 
                 if (result.Count() != 0)
@@ -76,8 +88,14 @@ namespace Phosphorus
 
             return users;
         }
+		/// <summary>
+		/// Advanced guild search.
+		/// </summary>
+		/// <param name="identifiers">List of strings to query in the guild database.</param>
+		/// <param name="exact"> If set to true, only the first match will be returned. </param>
+		/// <returns>Returns a list of <see cref="IGuild"/>.</returns>
 
-        public static List<IGuild> GetGuild(List<string> identifiers, bool repeat, bool exact)
+		public static List<IGuild> GetGuild(List<string> identifiers, bool exact)
         {
             List<IGuild> guilds = new List<IGuild>();
 
@@ -90,16 +108,10 @@ namespace Phosphorus
                 {
                     if (exact)
                     {
-                        if (!repeat)
-                            AddIfDoesntContainGuild(guilds, new List<SocketGuild>() { result.ToList()[0] });
-                        else
                             guilds.Add(result.ToList()[0]);
                     }
                     else
                     {
-                        if (!repeat)
-                            AddIfDoesntContainGuild(guilds, result.ToList());
-                        else
                             guilds.AddRange(result.ToList());
                     }
                 }

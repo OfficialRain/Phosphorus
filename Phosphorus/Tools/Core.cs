@@ -8,18 +8,27 @@ namespace Phosphorus
 {
     public static class Core
     {
+		/// <summary>
+		/// Class that encapsulates a command for Discord.
+		/// </summary>
         public class DiscordCommand
         {
             public DiscordCommand()
             {
                 Config.DiscordCommands.Add(this);
             }
-            public List<string> Aliases { get; set; }
-            public string Description { get; set; }
-            public string Category { get; set; }
-            public List<Usage> Usage { get; set; }
-            public PermissionLevel PermissionLevel { get; set; }
-            public Func<Discord.Commands.SocketCommandContext, string[], Task> Code { get; set; }
+			/// <summary> List of all possible names that can be used to execute the command. </summary>
+			public List<string> Aliases { get; set; }
+			/// <summary> Description of the command used in the help dialog. </summary>
+			public string Description { get; set; }
+			/// <summary> Category of the command used in the help dialog. </summary>
+			public string Category { get; set; }
+			/// <summary> <see cref="List{Usage}"/> that dictates what parameters the command accets. Used in the help dialog (and possibly in the future to pass directly into the command?). </summary>
+			public List<Usage> Usage { get; set; }
+			/// <summary> Permisson level of the command required to execute it. </summary>
+			public PermissionLevel PermissionLevel { get; set; }
+			/// <summary> Code for the command to be invoked. </summary>
+			public Func<Discord.Commands.SocketCommandContext, string[], Task> Code { get; set; }
         }
 
         public class ConsoleCommand
@@ -28,18 +37,28 @@ namespace Phosphorus
             {
                 Config.ConsoleCommands.Add(this);
             }
-            public List<string> Aliases { get; set; }
-            public string Description { get; set; }
-            public string Category { get; set; }
-            public List<Usage> Usage { get; set; }
-            public PermissionLevel PermissionLevel { get; set; }
-            public Func<string, string[], Task> Code { get; set; }
+			/// <summary> List of all possible names that can be used to execute the command. </summary>
+			public List<string> Aliases { get; set; }
+			/// <summary> Description of the command used in the help dialog. </summary>
+			public string Description { get; set; }
+			/// <summary> Category of the command used in the help dialog. </summary>
+			public string Category { get; set; }
+			/// <summary> <see cref="List{Usage}"/> that dictates what parameters the command accets. Used in the help dialog (and possibly in the future to pass directly into the command?). </summary>
+			public List<Usage> Usage { get; set; }
+			//no PermissonLevel, you can guess why
+			/// <summary> Code for the command to be invoked. </summary>
+			public Func<string, string[], Task> Code { get; set; }
         }
 
+		/// <summary>
+		/// Class that encaptulates a defenition for a command parameter.
+		/// </summary>
         public class Usage
         {
-            public ParameterType ParameterType { get; set; }
-            public string Name { get; set; }
+			/// <summary> <see cref="ParameterType"/> that defines if a parameter is required and if it bulk action. </summary>
+			public ParameterType ParameterType { get; set; }
+			/// <summary> Name of the parameter. </summary>
+			public string Name { get; set; }
         }
 
         public class Trigger
@@ -48,11 +67,17 @@ namespace Phosphorus
             {
                 Config.Triggers.Add(this);
             }
-            public string Key { get; set; }
-            public string Response { get; set; }
-            public TriggerSearchType SearchType { get; set; }
+			/// <summary> String that can invoke the trigger. </summary>
+			public string Key { get; set; }
+			/// <summary> Response to when the trigger is invoked. </summary>
+			public string Response { get; set; }
+			/// <summary> <see cref="TriggerSearchType"/> that dictates whether a portion or the full message should invoke the trigger. </summary>
+			public TriggerSearchType SearchType { get; set; }
         }
 
+		/// <summary>
+		/// Helper method for initializing commands and triggers.
+		/// </summary>
         public static void Initialize()
         {
             DiscordCommands.InitializeDiscordCommands();
@@ -60,19 +85,28 @@ namespace Phosphorus
             Triggers.InitializeTriggers();
         }
 
-        public enum ParameterType { Required, Optional, Infinite, InfiniteOptional }
-        public enum PermissionLevel { User, Trusted, Mod, Admin, Owner } //i don't really like the int based system of {Program.Client.CurrentUser.Username} 2, and enums are always cool
-        public enum TriggerSearchType { FullMessage, SearchFor }
+		/// <summary> Defines whether a <see cref="Usage"/> is required and whether it supports bulk action.</summary>
+		public enum ParameterType { Required, Optional, Infinite, InfiniteOptional }
+		/// <summary> Dictates a permission level for .</summary
+		public enum PermissionLevel { User, Trusted, Mod, Admin, Owner } //i don't really like the int based system of Phosphorus 2, and enums are always cool
+        public enum TriggerSearchType { FullMessage, Contains }
     }
 
+	/// <summary>
+	/// Global properties for Phosphorus configuration.
+	/// </summary>
     public static class Config
     {
-        public static Collection<DiscordCommand> DiscordCommands = new Collection<DiscordCommand>();
-        public static Collection<ConsoleCommand> ConsoleCommands = new Collection<ConsoleCommand>();
-        public static Collection<Trigger> Triggers = new Collection<Trigger>();
-        public const string Prefix = "p."; //there will be a system to change this later once i implement a TUI
-        public static DateTime StartTime = DateTime.Now; //used for getting the uptime
-        public static Discord.Color PhosphorusColor = new Discord.Color(0, 0, 0);
-        public static Discord.EmbedBuilder HelpEmbed { get; set; }
+		/// <summary> List of all initialized DiscordCommands. </summary>
+		public static Collection<DiscordCommand> DiscordCommands = new Collection<DiscordCommand>();
+		/// <summary> List of all initialized ConsoleCommands. </summary>
+		public static Collection<ConsoleCommand> ConsoleCommands = new Collection<ConsoleCommand>();
+		/// <summary> List of all initialized Triggers. </summary>
+		public static Collection<Trigger> Triggers = new Collection<Trigger>();
+		/// <summary> Global prefix for DiscordCommands. </summary>
+		public const string Prefix = "p."; //there will be a system to change this later once i implement a TUI
+		public static DateTime StartTime = DateTime.Now; //used for getting the uptime
+		/// <summary> Average color of the current user's profile picture. Used in embeds where a user color is not applicable. </summary>
+		public static Discord.Color PhosphorusColor = new Discord.Color(0, 0, 0);
     }
-}
+}	

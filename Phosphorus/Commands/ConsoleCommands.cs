@@ -9,11 +9,15 @@ using static Phosphorus.Core;
 
 namespace Phosphorus
 {
+
     public static class ConsoleCommands
     {
         static Random RandomEngine = new Random();
 
-        public static void InitializeConsoleCommands()
+		/// <summary>
+		/// Initializes console commands. The constructor for <see cref="ConsoleCommand"/> adds itself to a list of triggers.
+		/// </summary>
+		public static void InitializeConsoleCommands()
         {
             ConsoleCommand Ping = new ConsoleCommand()
             {

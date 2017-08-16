@@ -10,7 +10,12 @@ namespace Phosphorus
     {
         //this file won't be touched for a while
 
-        public async static Task HandleDiscordCommand(SocketMessage message)
+		/// <summary>
+		/// Default command handler for DiscordCommands. Is linked to the MessageRecieved handler.
+		/// </summary>
+		/// <param name="message">Message object recieved from the MessageRecieved handler.</param>
+		/// <param name="requiresPrefix">Boolean, that if set to true will disable the masking of the first few characters associcated with the prefix.</param>
+        public async static Task HandleDiscordCommand(SocketMessage message, bool requiresPrefix)
         {
             await Task.Yield();
 
@@ -44,7 +49,11 @@ namespace Phosphorus
             }
         }
 
-        public async static void HandleConsoleCommand(string message)
+		/// <summary>
+		/// Default command handler for ConsoleCommands. Is invoked upon <see cref="Program.Client.Ready"/> and is recursive.
+		/// </summary>
+		/// <param name="message">Text recieved from <see cref="Console.ReadLine()"/>.</param>
+		public async static void HandleConsoleCommand(string message)
         {
             Console.ForegroundColor = ConsoleColor.White;
             string commandName = string.Empty;
@@ -67,8 +76,12 @@ namespace Phosphorus
             HandleConsoleCommand(Console.ReadLine());
         }
 
-
-        public static void CheckForTriggers(SocketUserMessage message)
+		/// <summary>
+		/// Default command handler for DiscordCommands. Is linked to the MessageRecieved handler.
+		/// </summary>
+		/// <param name="message">Message object recieved from the MessageRecieved handler.</param>
+		/// <param name="requiresPrefix">Boolean, that if set to true will disable the masking of the first few characters associcated with the prefix.</param>
+		public static void CheckForTriggers(SocketUserMessage message)
         {
             foreach (var meme in Config.Triggers)
             {

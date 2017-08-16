@@ -14,7 +14,10 @@ namespace Phosphorus
     {
         static Random RandomEngine = new Random();
 
-        public static void InitializeDiscordCommands()
+		/// <summary>
+		/// Initializes discord commands. The constructor for <see cref="DiscordCommand"/> adds itself to a list of triggers.
+		/// </summary>
+		public static void InitializeDiscordCommands()
         {
             DiscordCommand Ping = new DiscordCommand()
             {

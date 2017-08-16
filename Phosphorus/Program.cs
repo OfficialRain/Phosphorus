@@ -14,6 +14,7 @@ namespace Phosphorus
         static void Main(string[] args)
            => new Program().MainAsync().GetAwaiter().GetResult();
 
+		//gotta make it async!
         public async Task MainAsync(string token = null)
         {
             try
