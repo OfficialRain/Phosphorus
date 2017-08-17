@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Microsoft.Win32.SafeHandles;
 using static Phosphorus.Core;
 
 namespace Phosphorus
@@ -31,7 +33,10 @@ namespace Phosphorus
 			public Func<Discord.Commands.SocketCommandContext, string[], Task> Code { get; set; }
         }
 
-        public class ConsoleCommand
+		/// <summary>
+		/// Class that encapsulates a command for the CLI tools.
+		/// </summary>
+		public class ConsoleCommand
         {
             public ConsoleCommand()
             {
@@ -53,13 +58,75 @@ namespace Phosphorus
 		/// <summary>
 		/// Class that encaptulates a defenition for a command parameter.
 		/// </summary>
-        public class Usage
+        public struct Usage
         {
 			/// <summary> <see cref="ParameterType"/> that defines if a parameter is required and if it bulk action. </summary>
 			public ParameterType ParameterType { get; set; }
 			/// <summary> Name of the parameter. </summary>
 			public string Name { get; set; }
         }
+
+		/// <summary>
+		/// Provider that allows commands to access raw messages directly from the chat.
+		/// </summary>
+		public class DirectAccessToken : IDisposable
+		{
+			public DirectAccessToken(Discord.WebSocket.SocketUser user = null)
+			{
+				Config.DirectAccessTokens.Add(this);
+				User = user;
+			}
+			/// <summary> Event handler invoked for each token. </summary
+			public event EventHandler AccessTokenInvoked;
+			/// <summary> User associated with the token. If null, no user is associated and all messages can invoke the token.. </summary>
+			public Discord.WebSocket.SocketUser User;
+
+			/// <summary>
+			/// Static method called upon message recieved to check all Direct Access Tokens.
+			/// </summary>
+			/// <param name="message">Message to be passed into the event</param>
+			/// <returns></returns>
+			public static async Task RaiseTokens(Discord.WebSocket.SocketMessage message)
+			{
+				try
+				{
+					foreach (var token in Config.DirectAccessTokens)
+						//if (message.Author == token.User | token.User == null)
+						token.AccessTokenInvoked?.Invoke(message, EventArgs.Empty);
+				}
+				catch(InvalidOperationException) { }
+			}
+
+			#region IDisposable Support
+			bool disposed = false;
+
+			private bool disposedValue = false; // To detect redundant calls
+
+			protected virtual void Dispose(bool disposing)
+			{
+				if (!disposedValue)
+				{
+					if (disposing)
+					{
+						Config.DirectAccessTokens.Remove(this);
+					}
+
+					// TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+					// TODO: set large fields to null.
+					AccessTokenInvoked = null;
+
+					disposedValue = true;
+				}
+			}
+
+			// This code added to correctly implement the disposable pattern.
+			public void Dispose()
+			{
+				// Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+				Dispose(true);
+			}
+			#endregion
+		}
 
         public class Trigger
         {
@@ -87,11 +154,11 @@ namespace Phosphorus
 
 		/// <summary> Defines whether a <see cref="Usage"/> is required and whether it supports bulk action.</summary>
 		public enum ParameterType { Required, Optional, Infinite, InfiniteOptional }
-		/// <summary> Dictates a permission level for .</summary
+		/// <summary>	 a permission level for .</summary
 		public enum PermissionLevel { User, Trusted, Mod, Admin, Owner } //i don't really like the int based system of Phosphorus 2, and enums are always cool
         public enum TriggerSearchType { FullMessage, Contains }
     }
-
+		
 	/// <summary>
 	/// Global properties for Phosphorus configuration.
 	/// </summary>
@@ -103,8 +170,11 @@ namespace Phosphorus
 		public static Collection<ConsoleCommand> ConsoleCommands = new Collection<ConsoleCommand>();
 		/// <summary> List of all initialized Triggers. </summary>
 		public static Collection<Trigger> Triggers = new Collection<Trigger>();
+		/// <summary> List of all initialized Direct Access Tokens. </summary>
+		public static Collection<DirectAccessToken> DirectAccessTokens = new Collection<DirectAccessToken>();
 		/// <summary> Global prefix for DiscordCommands. </summary>
 		public const string Prefix = "p."; //there will be a system to change this later once i implement a TUI
+		/// <summary> Time of application launch. </summary>
 		public static DateTime StartTime = DateTime.Now; //used for getting the uptime
 		/// <summary> Average color of the current user's profile picture. Used in embeds where a user color is not applicable. </summary>
 		public static Discord.Color PhosphorusColor = new Discord.Color(0, 0, 0);

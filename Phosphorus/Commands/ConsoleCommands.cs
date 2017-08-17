@@ -85,21 +85,51 @@ namespace Phosphorus
             ConsoleCommand SetGame = new ConsoleCommand()
             {
                 Aliases = new List<string>() { "setgame" },
-                Usage = new List<Usage>() { new Usage() { Name = "game name", ParameterType = ParameterType.Required } },
+                Usage = new List<Usage>() { new Usage() { Name = "streaming or playing", ParameterType = ParameterType.Required }, new Usage() { Name = "game name", ParameterType = ParameterType.Required }, new Usage() { Name = "stream link", ParameterType = ParameterType.Optional } },
                 Category = "Misc.",
                 Description = $"Sets the playing status of {Program.Client.CurrentUser.Username}.",
                 Code = new Func<string, string[], Task>(async (context, args) =>
-                {
-                    if (args.Count() > 0)
-                    {
-                        await Program.Client.SetGameAsync(args[0]);
-                        Tools.WriteLineWithColor($"Game has been succesfully set to \"{args[0]}\"", ConsoleColor.Green);
-                    }
-                    else
-                    {
-                        Tools.WriteLineWithColor("Please type in a game to change the Playing status to.", ConsoleColor.Yellow);
-                    }
-                })
+				{
+					if(args.Count() == 1)
+					{
+						Tools.WriteLineWithColor("Please specify a valid game type (streaming or playing) and a game. If you are streaming you must input a valid htpps://twitch.tv/ url.", ConsoleColor.Yellow);
+					}
+					else if(args.Count() == 2)
+					{
+						switch(args[0].ToLower())
+						{
+							case "playing":
+								await Program.Client.SetGameAsync(args[1]);
+								Tools.WriteLineWithColor($"Successfully set game to \"Playing {args[1]}\".", ConsoleColor.Green);
+								break;
+							case "streaming":
+								Tools.WriteLineWithColor("Please specify a valid game type (streaming or playing) and a game.", ConsoleColor.Yellow);
+								break;
+							default:
+								Tools.WriteLineWithColor("Please specify a valid https://www.twitch.tv/ url.", ConsoleColor.Yellow);
+								break;
+						}
+					}
+					else if(args.Count() == 3)
+					{
+						if(args[0].ToLower() == "streaming")
+						{
+							if(args[2].StartsWith("https://www.twitch.tv"))
+							{
+								await Program.Client.SetGameAsync(args[1], args[2], StreamType.Twitch);
+								Tools.WriteLineWithColor($"Successfully set  game to \"Streaming {args[1]}\" (at \"{args[2]}\".", ConsoleColor.DarkMagenta);
+							}
+							else
+							{ 
+								Tools.WriteLineWithColor("Please specify a valid https://www.twitch.tv/ url.", ConsoleColor.Yellow);
+							}
+						}
+						else
+						{
+							Tools.WriteLineWithColor("Please specify a valid game type (streaming or playing) and a game. If you are streaming, please specify a valid https://www.twitch.tv/ url.", ConsoleColor.Yellow);
+						}
+					}
+				})
             };
 
             ConsoleCommand SetStatus = new ConsoleCommand()
@@ -107,7 +137,7 @@ namespace Phosphorus
                 Aliases = new List<string>() { "setstatus" },
                 Usage = new List<Usage>() { new Usage() { Name = "status", ParameterType = ParameterType.Required } },
                 Category = "Misc.",
-                Description = $"Sets the status of {Program.Client.CurrentUser.Username} - online, idle, dnd, streaming and offline",
+                Description = $"Sets the status of {Program.Client.CurrentUser.Username} - online, idle, dnd, and offline",
                 Code = new Func<string, string[], Task>(async (context, args) =>
                 {
                     if (args.Count() > 0)
@@ -137,19 +167,8 @@ namespace Phosphorus
                                 await Program.Client.SetStatusAsync(UserStatus.Invisible);
                                 Tools.WriteLineWithColor($"Status has been succesfully set to Invisible.", ConsoleColor.Gray);
                                 break;
-                            case "streaming":
-                                if (args.Count() == 1)
-                                {
-                                    Tools.WriteLineWithColor($"For Straming you must input a game.", ConsoleColor.Yellow);
-                                }
-                                else
-                                {
-                                    await Program.Client.SetGameAsync(args[1], "https://www.twitch.tv/reflectron", StreamType.Twitch);
-                                    Tools.WriteLineWithColor($"Status has been succesfully set to Streaming.", ConsoleColor.DarkMagenta);
-                                }
-                                break;
                             default:
-                                Tools.WriteLineWithColor("Please type in a valid status to change the status to - online, idle, dnd, streaming or offline.", ConsoleColor.Yellow);
+                                Tools.WriteLineWithColor("Please type in a valid status to change the status to - online, idle, dnd, or offline.", ConsoleColor.Yellow);
                                 break;
                         }
                     }

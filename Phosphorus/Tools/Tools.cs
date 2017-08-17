@@ -89,7 +89,7 @@ namespace Phosphorus
 		public static Discord.Color DominantPicture(IUser user)
         {
             WebRequest request = WebRequest.Create(
-                user.GetAvatarUrl(Discord.ImageFormat.Png, 64));
+                user.GetAvatarUrl(Discord.ImageFormat.Png, 32));
             WebResponse response = request.GetResponse();
             System.IO.Stream responseStream =
                 response.GetResponseStream();

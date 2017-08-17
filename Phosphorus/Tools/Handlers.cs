@@ -14,27 +14,24 @@ namespace Phosphorus
 		/// Default command handler for DiscordCommands. Is linked to the MessageRecieved handler.
 		/// </summary>
 		/// <param name="message">Message object recieved from the MessageRecieved handler.</param>
-		/// <param name="requiresPrefix">Boolean, that if set to true will disable the masking of the first few characters associcated with the prefix.</param>
-        public async static Task HandleDiscordCommand(SocketMessage message, bool requiresPrefix)
+        public async static Task HandleDiscordCommand(SocketMessage message)
         {
-            await Task.Yield();
-
+			await Task.Yield();
             CheckForTriggers(message as SocketUserMessage);
             if (message.Content.StartsWith(Config.Prefix))
             {
                 string commandName = string.Empty;
                 try { commandName = message.Content.Substring(Config.Prefix.Length, message.Content.IndexOf(' ') - Config.Prefix.Length); }
                 catch (ArgumentOutOfRangeException) { commandName = message.Content.Substring(Config.Prefix.Length); }
-                //by this point we definitely know that this is a command
+				//by this point we definitely know that this is a command
 
-
-                var context = new Discord.Commands.SocketCommandContext(Program.Client, message as SocketUserMessage);
+				var context = new Discord.Commands.SocketCommandContext(Program.Client, message as SocketUserMessage);
                 try
                 {
                     var command = Config.DiscordCommands.FirstOrDefault(x => x.Aliases.Contains(commandName));
                     if (command != null)
                     {
-                        await command.Code.Invoke(context, GetArgs(message.Content));
+						await command.Code.Invoke(context, GetArgs(message.Content));
                     }
                     else
                     {

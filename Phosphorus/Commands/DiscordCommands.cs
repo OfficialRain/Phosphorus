@@ -27,7 +27,7 @@ namespace Phosphorus
                 Description = "Checks to see if the bot is online.",
                 Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
                 {
-                    string[] pings = new string[] { "I am alive.", "Turtl'o'bot is my friend!", "JXBot is the best!", "Do you like cheese? 🧀", "Remember PhosphorusVB?", "Thanks for playing pong with me!", "Dab on them haters!", "What if haters dab back?", "`IndexOutOfRangeExcepti`- just kidding." };
+                    string[] pings = new string[] { "I am alive.", "Turtle'o'bot is my friend!", "JXBot is the best!", "Do you like cheese? 🧀", "Remember PhosphorusVB?", "Thanks for playing pong with me!", "Dab on them haters!", "What if haters dab back?", "`IndexOutOfRangeExcepti`- just kidding." };
                     if (args.Count() == 0)
                         await context.Channel.SendMessageAsync("**Pong!** " + pings[RandomEngine.Next(pings.Length)]);
                     else
@@ -43,7 +43,7 @@ namespace Phosphorus
                         {
                             await context.Channel.SendMessageAsync("", embed: Tools.ErrorEmbedCreator("Need more pings!!!1", $"That's not a valid index. Try again with a lower index (right now we have {pings.Count().ToString()}!"));
                         }
-                })
+				})
             };
 
             DiscordCommand Help = new DiscordCommand()
@@ -56,18 +56,34 @@ namespace Phosphorus
                 {
                     if (args.Count() == 0)
                     {
-                        Config.HelpEmbed = new EmbedBuilder()
-                        {
-                            Color = Config.PhosphorusColor,
-                            Author = new EmbedAuthorBuilder()
-                            {
-                                IconUrl = context.Client.CurrentUser.GetAvatarUrl(),
-                                Name = $"{context.Client.CurrentUser.Username} Help"
-                            },
-                            Description = $"This is a list of commands that you can use in {context.Client.CurrentUser.Username}. Type in `p.help [command name]` to get more info on a command."
-                        };
-                    }
-                    else
+						List<string> list = new List<string>();
+						EmbedBuilder embed = new EmbedBuilder()
+						{
+							Color = Config.PhosphorusColor,
+							Author = new EmbedAuthorBuilder()
+							{
+								IconUrl = context.Client.CurrentUser.GetAvatarUrl(),
+								Name = $"{context.Client.CurrentUser.Username} Help"
+							},
+							Description = $"This is a list of commands that you can use in {context.Client.CurrentUser.Username}. Type in `p.help [command name]` to get more info on a command. {Environment.NewLine}"
+						};
+						foreach (var item in Config.DiscordCommands)
+							if (!list.Contains(item.Category))
+								list.Add(item.Category);
+
+						foreach (var item in list)
+						{
+							StringBuilder sb = new StringBuilder();
+							foreach(var command in Config.DiscordCommands.Where(x => x.Category == item))
+							{
+								sb.AppendLine(command.Aliases[0]);
+							}
+							embed.AddInlineField(item, sb.ToString());
+						}
+
+						await context.Channel.SendMessageAsync("", embed: embed);
+					}
+					else
                     {
                         foreach (var arg in args)
                         {
@@ -126,7 +142,7 @@ namespace Phosphorus
             {
                 Aliases = new List<string>() { "getavatar", "getpfp", "picture", "getprofilepicture", "pfp" },
                 Usage = new List<Usage>() { new Usage() { Name = "user", ParameterType = ParameterType.Infinite } },
-                Category = "Misc.",
+                Category = "User",
                 Description = "Gets the avatar of a user.",
                 Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
                 {
@@ -160,7 +176,7 @@ namespace Phosphorus
                 Description = "Retrieves various information about a user.",
                 Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
                 {
-                    IGuild guild = Tools.GetGuild(new List<string>() { args.FirstOrDefault(x => x.StartsWith("from")).Substring(5) }, false, true)[0];
+                    IGuild guild = Tools.GetGuild(new List<string>() { args.FirstOrDefault(x => x.StartsWith("from")).Substring(5) }, true)[0];
 
                     foreach (var arg in args)
                     {
@@ -222,6 +238,6 @@ namespace Phosphorus
                     }
                 })
             };
-        }
-    }
+		}
+	}
 }

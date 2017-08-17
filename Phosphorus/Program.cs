@@ -42,7 +42,13 @@ namespace Phosphorus
             }
             await Client.StartAsync();
             Client.Log += Logger;
-            Client.MessageReceived += Tools.HandleDiscordCommand;
+			Client.MessageReceived += Core.DirectAccessToken.RaiseTokens;
+			Client.MessageReceived += Tools.HandleDiscordCommand;
+			Client.ChannelCreated += async (channel) =>
+			{
+				if (channel is SocketTextChannel)
+					await (channel as SocketTextChannel).SendMessageAsync("first");
+			};
             Client.Ready += async () =>
             {
                 Core.Initialize();
