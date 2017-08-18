@@ -4,7 +4,6 @@ using NinjaNye.SearchExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Phosphorus
 {
@@ -47,18 +46,25 @@ namespace Phosphorus
 		/// <param name="repeat">If set to true, multiple instances of users from different guilds will be included in the return list.</param>
 		/// <param name="exact"> If set to true, only the first match will be returned. </param>
 		/// <returns>Returns a list of <see cref="IUser"/>.</returns>
-        public static List<IUser> GetUser(List<string> identifiers, bool repeat, bool exact)
+		public static List<IUser> GetUser(List<string> identifiers, bool repeat, bool exact, KeyValuePair<bool, SocketGuild> localSwitch)
         {
             List<IUser> users = new List<IUser>();
             List<IUser> allusers = new List<IUser>();
-            foreach (var guild in Program.Client.Guilds)
-            {
-                allusers.AddRange(guild.Users);
-            }
+			if(!localSwitch.Key)
+			{
+				foreach (var guild in Program.Client.Guilds)
+				{
+					allusers.AddRange(guild.Users);
+				}
+			}
+			else
+			{
+				allusers.AddRange(localSwitch.Value.Users);
+			}
 
-            //oh no
+			//oh no
 
-            foreach (var item in identifiers)
+			foreach (var item in identifiers)
             {
                 var result = allusers.Search(x => GetDisplayName(x as SocketGuildUser).ToLower(), x => x.Username.ToLower())
                     .Containing(item.ToLower());
@@ -85,7 +91,7 @@ namespace Phosphorus
                     users.Add(null);
                 }
             }
-
+	
             return users;
         }
 		/// <summary>

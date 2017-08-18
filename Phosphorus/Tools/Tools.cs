@@ -81,6 +81,23 @@ namespace Phosphorus
                     list.Add(user);
         }
 
+
+		public async static System.Threading.Tasks.Task<Core.PermissionLevel> GetPermissionLevel(SocketGuildUser user)
+		{
+			if (user.Id == (await Program.Client.GetApplicationInfoAsync()).Owner.Id)
+				return Core.PermissionLevel.ApplicationOwner;
+			else if (user.Guild.OwnerId == user.Id)
+				return Core.PermissionLevel.GuildOwner;
+			else if (user.GuildPermissions.Administrator)
+				return Core.PermissionLevel.Admin;
+			else if (user.GuildPermissions.ManageGuild)
+				return Core.PermissionLevel.Manager;
+			if (user.GuildPermissions.KickMembers || user.GuildPermissions.ManageMessages)
+				return Core.PermissionLevel.Mod;
+			else
+				return Core.PermissionLevel.User;
+		}
+
 		/// <summary>
 		/// Gets the average color of an <see cref="IUser"/>'s profile picture
 		/// </summary>

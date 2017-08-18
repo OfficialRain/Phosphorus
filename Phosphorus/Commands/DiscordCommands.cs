@@ -19,12 +19,13 @@ namespace Phosphorus
 		/// </summary>
 		public static void InitializeDiscordCommands()
         {
-            DiscordCommand Ping = new DiscordCommand()
-            {
-                Aliases = new List<string>() { "ping", "pong" },
-                Usage = new List<Usage>(),
-                Category = "Misc.",
-                Description = "Checks to see if the bot is online.",
+			DiscordCommand Ping = new DiscordCommand()
+			{
+				Aliases = new List<string>() { "ping", "pong" },
+				Usage = new List<Usage>(),
+				Category = "Misc.",
+				Description = "Checks to see if the bot is online.",
+				PermissionLevel = PermissionLevel.User,
                 Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
                 {
                     string[] pings = new string[] { "I am alive.", "Turtle'o'bot is my friend!", "JXBot is the best!", "Do you like cheese? 🧀", "Remember PhosphorusVB?", "Thanks for playing pong with me!", "Dab on them haters!", "What if haters dab back?", "`IndexOutOfRangeExcepti`- just kidding." };
@@ -52,7 +53,8 @@ namespace Phosphorus
                 Usage = new List<Usage>() { new Usage() { Name = "command", ParameterType = ParameterType.Optional } },
                 Category = "Misc.",
                 Description = "Lists the possible Discord commands.",
-                Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
+				PermissionLevel = PermissionLevel.User,
+				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
                 {
                     if (args.Count() == 0)
                     {
@@ -121,11 +123,12 @@ namespace Phosphorus
                                         Name = $"{arg} Help"
                                     },
                                     Title = sb.ToString(),
+									Color = Config.PhosphorusColor,
                                     Description = $"**Description:** {command.Description}{Environment.NewLine}**Category:** {command.Category}{Environment.NewLine}**Permission Level:** {command.PermissionLevel.ToString()}{Environment.NewLine}**Usage:** `<p.{command.Aliases[0]}>` {sb2.ToString()}",
                                     Footer = new EmbedFooterBuilder()
                                     {
-                                        Text = "`[optional parameter]` `<required parameter>`"
-                                    }
+                                        Text = "<required parameter> [optional parameter]"
+									}
                                 };
                                 await context.Channel.SendMessageAsync(context.Message.Content.StartsWith("p.halp") ? "\"halp\"? Really?" : "", embed: embed);
                             }
@@ -144,9 +147,10 @@ namespace Phosphorus
                 Usage = new List<Usage>() { new Usage() { Name = "user", ParameterType = ParameterType.Infinite } },
                 Category = "User",
                 Description = "Gets the avatar of a user.",
-                Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
+				PermissionLevel = PermissionLevel.User,
+				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
                 {
-                    var users = Tools.GetUser(args.ToList(), false, true);
+					var users = Tools.GetUser(args.ToList(), false, true, new KeyValuePair<bool, SocketGuild>(true, null));
 
                     foreach (var user in users)
                     {
@@ -168,76 +172,174 @@ namespace Phosphorus
                 })
             };
 
-            DiscordCommand UserInfo = new DiscordCommand()
-            {
-                Aliases = new List<string>() { "uinfo", "userinfo", "getuinfo" },
-                Usage = new List<Usage>() { new Usage() { Name = "guild", ParameterType = ParameterType.Required }, new Usage() { Name = "user", ParameterType = ParameterType.Infinite } },
-                Category = "Staff",
-                Description = "Retrieves various information about a user.",
-                Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
-                {
-                    IGuild guild = Tools.GetGuild(new List<string>() { args.FirstOrDefault(x => x.StartsWith("from")).Substring(5) }, true)[0];
+			DiscordCommand Off = new DiscordCommand()
+			{
+				Aliases = new List<string>() { "shutdown", "off", "exit" },
+				Usage = new List<Usage>() { new Usage() { Name = "exit code", ParameterType = ParameterType.Optional} },
+				Category = "Owner.",
+				Description = "Shuts down the bot.",
+				PermissionLevel = PermissionLevel.ApplicationOwner,
+				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
+				{
+					if(args.Count() > 0)
+					{
+						try
+						{
+							await context.Channel.SendMessageAsync($"Shutting down with exit code {args[0]}...");
+							await context.Client.SetStatusAsync(UserStatus.Invisible);
+							Environment.Exit(Convert.ToInt32(args[0]));
+						}
+						catch(FormatException)
+						{
+							await context.Channel.SendMessageAsync("", embed:Tools.ErrorEmbedCreator("Invalid exit code", $"{args[0]} isn't a valid application exit code. Please try again with a number."));
+							return;
+						}
+					}
+					else
+					{
+						await context.Channel.SendMessageAsync($"Shutting down with exit code 0...");
+						await context.Client.SetStatusAsync(UserStatus.Invisible);
+						Environment.Exit(0);
+					}
 
-                    foreach (var arg in args)
-                    {
-                        if (arg.StartsWith("from"))
-                            continue;
-                        var usermini = Tools.GetUser(new List<string>() { arg }, true, true)[0];
-                        if (usermini == null)
-                        {
-                            await context.Channel.SendMessageAsync("", embed: Tools.ErrorEmbedCreator("User not found", $"One of the users was not found."));
-                            return;
-                        }
+					await context.Channel.SendMessageAsync("", embed: Tools.ErrorEmbedCreator("Could not shut down", $"For some bizarre reason the bot cannot be shut down at this time."));
+				})
+			};
 
-                        StringBuilder sb = new StringBuilder();
-                        StringBuilder sb2 = new StringBuilder();
-                        if (usermini.Game.HasValue)
-                        {
-                            if (usermini.Game.Value.StreamType == StreamType.Twitch)
-                                sb.Append($"Streaming{Environment.NewLine}**Stream URL:** {usermini.Game.Value.StreamUrl}");
-                        }
-                        else
-                        {
-                            sb.Append(usermini.Status.ToString());
-                        }
-                        EmbedBuilder embedmini = new EmbedBuilder()
-                        {
-                            Color = Tools.DominantPicture(usermini),
-                            Author = new EmbedAuthorBuilder()
-                            {
-                                IconUrl = usermini.GetAvatarUrl(),
-                                Name = $"{usermini.Username}#{usermini.Discriminator}"
-                            },
-                            Footer = new EmbedFooterBuilder()
-                            {
-                                Text = $"Invoked by {context.Message.Author}",
-                                IconUrl = context.Message.Author.GetAvatarUrl()
-                            },
-                            ThumbnailUrl = usermini.GetAvatarUrl(size: 2048),
-                            Timestamp = context.Message.Timestamp
-                        };
+			DiscordCommand Do = new DiscordCommand()
+			{
+				Aliases = new List<string>() { "manage", "do", "deal", "act" },
+				Usage = new List<Usage>() { new Usage() { Name = "user", ParameterType = ParameterType.Infinite} },
+				Category = "Staff",
+				Description = "Manages users.",
+				PermissionLevel = PermissionLevel.Mod,
+				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
+				{
+					var users = Tools.GetUser(args.ToList(), false, true, new KeyValuePair<bool, SocketGuild>(true, context.Guild));
+					StringBuilder sb = new StringBuilder();
+					StringBuilder sb2 = new StringBuilder();
 
-                        embedmini.AddInlineField("Identification", $"**Username:** {usermini.Username}{Environment.NewLine}**Discriminator:** {usermini.Discriminator}{Environment.NewLine}**ID:** {usermini.Id.ToString()}{Environment.NewLine}**Created at:** {usermini.CreatedAt}{Environment.NewLine}**Status:** {sb.ToString()}{Environment.NewLine}**Playing:** {Tools.GetGame(usermini)}");
+					users.ForEach(x => sb2.Append($"{x.Username}#{x.Discriminator} "));
+					if(context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.ManageNicknames)
+					{
+						sb.Append("`[n]ick` ");
+					}
+					if (context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.ManageRoles)
+					{
+						//TODO: implement these features
+						//sb.Append("`[m]ute` `[i]nterrogate` `[j]ail` ");
+					}
+					if (context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.KickMembers)
+					{
+						sb.Append("`[k]ick` ");
+					}
+					if (context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.BanMembers)
+					{
+						sb.Append("`[b]an` ");
+					}
+					if(sb.ToString() == string.Empty)
+					{
+						await context.Channel.SendMessageAsync("No action of mine is allowed by my permissions. Cancelling action.");
+						return;
+					}
+					sb.Append("`cancel` ");
 
-                        if (guild != null)
-                        {
-                            var users = Tools.GetUser(new List<string>() { arg }, true, true).First(x => (x as SocketGuildUser).Guild == guild) as SocketGuildUser;
-                            embedmini.AddInlineField($"On {users.Guild}", $"**Display Name:** {users.Nickname}{Environment.NewLine}**Joined at:** {users.JoinedAt}");
-                        }
-                        if (usermini.IsBot)
-                            sb2.Append($"This user is a bot.{Environment.NewLine}");
-                        if (usermini.IsWebhook)
-                            sb2.Append($"This user is a webhook.{Environment.NewLine}");
+					await context.Channel.SendMessageAsync($"Take action against {sb2.ToString()}: {sb.ToString()}");
 
-                        if (sb2.ToString() != string.Empty)
-                        {
-                            embedmini.AddInlineField("Warnings", sb2.ToString());
-                        }
+					DirectAccessToken token = new DirectAccessToken(context.Message.Author);
+					token.AccessTokenInvoked += async (messageAsObject, e) =>
+					{
+						var message = (messageAsObject as SocketMessage);
+						switch(message.Content.ToLower())
+						{
+							case "n":
+							case "nick":
+								{
+									token.Dispose();
+									await message.Channel.SendMessageAsync("Type in a nickname to change the names to or `cancel`.");
+									DirectAccessToken nicktoken = new DirectAccessToken(context.User);
+									nicktoken.AccessTokenInvoked += async (nickMessageAsObject, nickE) =>
+									{
+										var nickMessage = (nickMessageAsObject as SocketMessage);
+										if (nickMessage.Content.ToLower() == "cancel")
+										{
+											await nickMessage.Channel.SendMessageAsync("Cancelled action.");
+											nicktoken.Dispose();
+											return;
+										}
+										foreach (var user in users)
+										{
+											await (user as SocketGuildUser).ModifyAsync(x => x.Nickname = nickMessage.Content);
+										}
+										await message.Channel.SendMessageAsync($"The user(s') nickname(s) have been changed to \"{nickMessage.Content}\".");
+										nicktoken.Dispose();
+									};
+								}
+								return;
+							case "k":
+							case "kick":
+								{
+									token.Dispose();
+									await message.Channel.SendMessageAsync("Type in a reason to kick or `cancel`.");
+									DirectAccessToken kicktoken = new DirectAccessToken(context.User);
+									kicktoken.AccessTokenInvoked += async (kickMessageAsObject, nickE) =>
+									{
+										var kickMessage = (kickMessageAsObject as SocketMessage);
+										if (kickMessage.Content.ToLower() == "cancel")
+										{
+											await kickMessage.Channel.SendMessageAsync("Cancelled action.");
+											kicktoken.Dispose();
+											return;
+										}
+										foreach (var user in users)
+										{
+											//too lazy to use context
+											await (user as SocketGuildUser).KickAsync(kickMessage.Content);
+										}
+										await message.Channel.SendMessageAsync($"The user(s') have been kicked for \"{kickMessage.Content}\".");
+										kicktoken.Dispose();
+									};
+								}
+								return;
 
-                        await context.Channel.SendMessageAsync("", embed: embedmini);
-                    }
-                })
-            };
+							case "b":
+							case "ban":
+								{
+									token.Dispose();
+									await message.Channel.SendMessageAsync("Type in a reason to ban or `cancel`.");
+									DirectAccessToken bantoken = new DirectAccessToken(context.User);
+									bantoken.AccessTokenInvoked += async (banMessageAsObject, nickE) =>
+									{
+										var banMessage = (banMessageAsObject as SocketMessage);
+										if (banMessage.Content.ToLower() == "cancel")
+										{
+											await banMessage.Channel.SendMessageAsync("Cancelled action.");
+											bantoken.Dispose();
+											return;
+										}
+										foreach (var user in users)
+										{
+											//too lazy to use context
+											await (message.Author as SocketGuildUser).Guild.AddBanAsync(user as IUser, reason: banMessage.Content);
+										}
+										await message.Channel.SendMessageAsync($"The user(s') have been banned for \"{banMessage.Content}\".");
+										bantoken.Dispose();
+									};
+								}
+								return;
+							case "cancel":
+								await message.Channel.SendMessageAsync("Cancelled action.");
+								token.Dispose();
+								return;
+							default:
+								await message.Channel.SendMessageAsync("Unknown action. Cancelled action.");
+								token.Dispose();
+								return;
+						}
+					};
+				})
+			};
 		}
 	}
 }
+	

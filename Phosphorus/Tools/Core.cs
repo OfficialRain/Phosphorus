@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Microsoft.Win32.SafeHandles;
+using Discord.WebSocket;
 using static Phosphorus.Core;
 
 namespace Phosphorus
@@ -66,32 +65,38 @@ namespace Phosphorus
 			public string Name { get; set; }
         }
 
+		public struct ManageInstance
+		{
+			public List<SocketUser> ManagedUsers { get; set; }
+			public SocketUser Manager { get; set; }
+		}
+
 		/// <summary>
 		/// Provider that allows commands to access raw messages directly from the chat.
 		/// </summary>
 		public class DirectAccessToken : IDisposable
 		{
-			public DirectAccessToken(Discord.WebSocket.SocketUser user = null)
+			public DirectAccessToken(SocketUser user)
 			{
 				Config.DirectAccessTokens.Add(this);
 				User = user;
 			}
 			/// <summary> Event handler invoked for each token. </summary
 			public event EventHandler AccessTokenInvoked;
-			/// <summary> User associated with the token. If null, no user is associated and all messages can invoke the token.. </summary>
-			public Discord.WebSocket.SocketUser User;
+			/// <summary> User associated with the token. </summary>
+			public SocketUser User;
 
 			/// <summary>
 			/// Static method called upon message recieved to check all Direct Access Tokens.
 			/// </summary>
 			/// <param name="message">Message to be passed into the event</param>
 			/// <returns></returns>
-			public static async Task RaiseTokens(Discord.WebSocket.SocketMessage message)
+			public static async Task RaiseTokens(SocketMessage message)
 			{
 				try
 				{
 					foreach (var token in Config.DirectAccessTokens)
-						//if (message.Author == token.User | token.User == null)
+						if (message.Author == token.User)
 						token.AccessTokenInvoked?.Invoke(message, EventArgs.Empty);
 				}
 				catch(InvalidOperationException) { }
@@ -155,7 +160,7 @@ namespace Phosphorus
 		/// <summary> Defines whether a <see cref="Usage"/> is required and whether it supports bulk action.</summary>
 		public enum ParameterType { Required, Optional, Infinite, InfiniteOptional }
 		/// <summary>	 a permission level for .</summary
-		public enum PermissionLevel { User, Trusted, Mod, Admin, Owner } //i don't really like the int based system of Phosphorus 2, and enums are always cool
+		public enum PermissionLevel { User, Mod, Manager, Admin, GuildOwner, ApplicationOwner } //i don't really like the int based system of Phosphorus 2, and enums are always cool
         public enum TriggerSearchType { FullMessage, Contains }
     }
 		
@@ -172,11 +177,13 @@ namespace Phosphorus
 		public static Collection<Trigger> Triggers = new Collection<Trigger>();
 		/// <summary> List of all initialized Direct Access Tokens. </summary>
 		public static Collection<DirectAccessToken> DirectAccessTokens = new Collection<DirectAccessToken>();
+		/// <summary> List of all instances of a Management action. </summary>
+		public static List<ManageInstance> ManageInstances = new List<ManageInstance>();
 		/// <summary> Global prefix for DiscordCommands. </summary>
 		public const string Prefix = "p."; //there will be a system to change this later once i implement a TUI
 		/// <summary> Time of application launch. </summary>
 		public static DateTime StartTime = DateTime.Now; //used for getting the uptime
 		/// <summary> Average color of the current user's profile picture. Used in embeds where a user color is not applicable. </summary>
 		public static Discord.Color PhosphorusColor = new Discord.Color(0, 0, 0);
-    }
+	}
 }	

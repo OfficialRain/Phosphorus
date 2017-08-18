@@ -49,7 +49,7 @@ namespace Phosphorus
             {
                 Aliases = new List<string>() { "changetoken", "swaptoken" },
                 Usage = new List<Usage>() { new Usage() { Name = "token", ParameterType = ParameterType.Required } },
-                Category = "Runtime.",
+                Category = "Runtime",
                 Description = $"Hot-swaps token that {Program.Client.CurrentUser.Username} is operating on.",
                 Code = new Func<string, string[], Task>(async (context, args) =>
                 {
@@ -82,7 +82,42 @@ namespace Phosphorus
                 })
             };
 
-            ConsoleCommand SetGame = new ConsoleCommand()
+			ConsoleCommand ReloadCommands = new ConsoleCommand()
+			{
+				Aliases = new List<string>() { "reloadcommands", "loadcommands", "reload" },
+				Usage = new List<Usage>(),
+				Category = "Runtime",
+				Description = $"Reloads ConsoleCommands and DiscordCommands.",
+				Code = new Func<string, string[], Task>(async (context, args) =>
+				{
+					Config.ConsoleCommands.Clear();
+					Config.DiscordCommands.Clear();
+					GC.Collect();
+					GC.WaitForPendingFinalizers();
+					Initialize();
+					Tools.WriteLineWithColor("All commands have successfully reloaded.", ConsoleColor.Green);
+				})
+			};
+
+			ConsoleCommand ClearAllTokens = new ConsoleCommand()
+			{
+				Aliases = new List<string>() { "clearaccesstokens", "clearalltokens", "cleartokens" },
+				Usage = new List<Usage>(),
+				Category = "Runtime",
+				Description = $"Clears all Direct Access Tokens.",
+				Code = new Func<string, string[], Task>(async (context, args) =>
+				{
+					foreach(var token in Config.DirectAccessTokens)
+						token.Dispose();
+
+					Config.DirectAccessTokens.Clear();
+					GC.Collect();
+					GC.WaitForPendingFinalizers();
+					Tools.WriteLineWithColor("All Direct Access Tokens have been removed from meomory.", ConsoleColor.Green);
+				})
+			};
+
+			ConsoleCommand SetGame = new ConsoleCommand()
             {
                 Aliases = new List<string>() { "setgame" },
                 Usage = new List<Usage>() { new Usage() { Name = "streaming or playing", ParameterType = ParameterType.Required }, new Usage() { Name = "game name", ParameterType = ParameterType.Required }, new Usage() { Name = "stream link", ParameterType = ParameterType.Optional } },

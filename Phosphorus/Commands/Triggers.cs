@@ -1,5 +1,4 @@
-﻿using System;
-using static Phosphorus.Core;
+﻿using static Phosphorus.Core;
 
 namespace Phosphorus
 {
@@ -19,8 +18,9 @@ namespace Phosphorus
             Trigger BrandonsPhoneNumberTrigger = new Trigger()
             {
                 Key = "what's brandon's phone number?",
-                Response = "It's `+44 7469 627541`! {user}",
-                SearchType = TriggerSearchType.FullMessage
+				//Response = "It's `+44 7469 627541`! {user}",
+				Response = "It's something I don't have anymore, that's for sure.",
+				SearchType = TriggerSearchType.FullMessage
             };
             Trigger TwentyOneTrigger = new Trigger()
             {
@@ -34,13 +34,19 @@ namespace Phosphorus
                 Response = "five",
                 SearchType = TriggerSearchType.FullMessage
             };
-            Trigger ShiftOSTrigger = new Trigger()
+            Trigger CODTrigger = new Trigger()
             {
                 Key = "call of duty",
                 Response = "did you mean \"cancer\"? {user}",
                 SearchType = TriggerSearchType.Contains
             };
+			Trigger HotStringTrigger = new Trigger()
+			{
+				Key = "hot string",
+				Response = "```hot```",
+				SearchType = TriggerSearchType.FullMessage
+			};
 
-        }
-    }
+		}
+	}
 }

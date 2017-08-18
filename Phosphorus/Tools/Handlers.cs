@@ -31,8 +31,15 @@ namespace Phosphorus
                     var command = Config.DiscordCommands.FirstOrDefault(x => x.Aliases.Contains(commandName));
                     if (command != null)
                     {
-						await command.Code.Invoke(context, GetArgs(message.Content));
-                    }
+						if(command.PermissionLevel <= await GetPermissionLevel(message.Author as SocketGuildUser))
+						{
+							await command.Code.Invoke(context, GetArgs(message.Content));
+						}	
+						else
+						{
+							await context.Channel.SendMessageAsync("", embed: ErrorEmbedCreator("Not enough permission", "You do not have the permission to execute this command."));
+						}
+					}
                     else
                     {
                         await message.Channel.SendMessageAsync($"A command with the name `{commandName}` does not exist. Please type in `p.help` to display a list of commands.");
