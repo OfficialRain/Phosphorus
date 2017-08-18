@@ -7,10 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static Phosphorus.Core;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace Phosphorus
 {
-    public static class DiscordCommands
+	public static class DiscordCommands
     {
         static Random RandomEngine = new Random();
 
@@ -42,7 +44,7 @@ namespace Phosphorus
                         }
                         catch (IndexOutOfRangeException)
                         {
-                            await context.Channel.SendMessageAsync("", embed: Tools.ErrorEmbedCreator("Need more pings!!!1", $"That's not a valid index. Try again with a lower index (right now we have {pings.Count().ToString()}!"));
+                            await context.Channel.SendMessageAsync("", embed: Tools.ErrorEmbedCreator("Need more pings!!!1", $"That's not a valid index. Try again with a lower index (right now we have {pings.Count()}!"));
                         }
 				})
             };
@@ -209,7 +211,7 @@ namespace Phosphorus
 			DiscordCommand Do = new DiscordCommand()
 			{
 				Aliases = new List<string>() { "manage", "do", "deal", "act" },
-				Usage = new List<Usage>() { new Usage() { Name = "user", ParameterType = ParameterType.Infinite} },
+				Usage = new List<Usage>() { new Usage() { Name = "user", ParameterType = ParameterType.Infinite } },
 				Category = "Staff",
 				Description = "Manages users.",
 				PermissionLevel = PermissionLevel.Mod,
@@ -339,7 +341,89 @@ namespace Phosphorus
 					};
 				})
 			};
+
+			DiscordCommand Find = new DiscordCommand()
+			{
+				Aliases = new List<string>() { "find", "search" },
+				Usage = new List<Usage>() { new Usage() { Name = "query", ParameterType = ParameterType.Required } },
+				Category = "Staff",
+				Description = "Queries a cross-server list of users with a specified search term.",
+				PermissionLevel = PermissionLevel.Mod,
+				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
+				{
+					var users = Tools.GetUser(new List<string>() { args[0] }, false, false, new KeyValuePair<bool, SocketGuild>(false, null));
+					StringBuilder sb = new StringBuilder();
+					int i = 0;
+					foreach(var user in users)
+					{
+						sb.Append($"**{user.Username}**#{user.Discriminator}{Environment.NewLine}");
+						i++;
+						if (i >= 15)
+						{
+							sb.Append($"{(users.Count - 15)} more results - please narrow your query.");
+							break;
+						}
+					}
+
+					EmbedBuilder embed = new EmbedBuilder()
+					{
+						Title = $"Search results for {args[0]}",
+						Color = Config.PhosphorusColor,
+						Description = sb.ToString(),
+						Footer = new EmbedFooterBuilder()
+						{
+							Text = $"Invoked by {context.Message.Author.Username}"
+						},
+						Timestamp = context.Message.Timestamp
+					};
+
+					await context.Channel.SendMessageAsync("", embed: embed);
+				})
+			};
+
+			DiscordCommand BulkDelete = new DiscordCommand()
+			{
+				Aliases = new List<string>() { "bulkdelete", "prune", "purge" },
+				Usage = new List<Usage>() { new Usage() { Name = "messages to delete", ParameterType = ParameterType.Required } },
+				Category = "Staff",
+				Description = "Deletes a certain amount of messages.",
+				PermissionLevel = PermissionLevel.Mod,
+				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
+				{
+					try
+					{
+						await context.Channel.DeleteMessagesAsync(await context.Channel.GetMessagesAsync(Convert.ToInt32(args[0])).Flatten());
+						await context.Channel.SendMessageAsync($"<:checkmark:348180546519564293> Deleted { args[0]} messages.");
+					}
+					catch (FormatException)
+					{
+						await context.Channel.SendMessageAsync("", embed: Tools.ErrorEmbedCreator("Not a number", "Please specify a valid amount of messages to delete."));
+					}
+				})
+			};
+
+			DiscordCommand Info = new DiscordCommand()
+			{
+				Aliases = new List<string>() { "info", "stats" },
+				Usage = new List<Usage>(),
+				Category = "Misc.",
+				Description = $"Returns various info about the runtime of {Program.Client.CurrentUser.Username}.",
+				PermissionLevel = PermissionLevel.User,
+				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
+				{
+					Process currentProcess = Process.GetCurrentProcess();
+					TimeSpan time = DateTime.Now - currentProcess.StartTime;
+					EmbedBuilder embed = new EmbedBuilder()
+					{
+						Title = $"{Program.Client.CurrentUser.Username} Info",
+						Color = Config.PhosphorusColor,
+						Timestamp = context.Message.Timestamp
+					};
+					embed.AddInlineField("Stats", $"**Library:** Discord.NET {DiscordConfig.Version}{Environment.NewLine}**Uptime:** {time.ToString().Substring(0, 8)}**Framework:** {RuntimeInformation.FrameworkDescription}{Environment.NewLine}**OS Description:** {RuntimeInformation.OSDescription}{Environment.NewLine}**Process Architecture:** {RuntimeInformation.ProcessArchitecture}{Environment.NewLine}**Core Count:** {Environment.ProcessorCount}{Environment.NewLine}**RAM Usage:** {currentProcess.WorkingSet64 / 1024 / 1024} MB{Environment.NewLine}**Threads:** {currentProcess.Threads.Count}");
+
+					await context.Channel.SendMessageAsync("", embed: embed);
+				})
+			};
 		}
 	}
 }
-	

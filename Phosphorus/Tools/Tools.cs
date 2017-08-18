@@ -19,13 +19,37 @@ namespace Phosphorus
 		/// <returns> Returns an EmbedBuilder with a custom error message. </returns>
         public static EmbedBuilder ErrorEmbedCreator(string title, string message)
         {
-            return new EmbedBuilder
-            {
-                Title = title,
-                Description = message,
-                Color = new Discord.Color(240, 71, 71)
-            };
+			EmbedBuilder embed = new EmbedBuilder()
+			{
+				Color = new Discord.Color(240, 71, 71),
+				Author = new EmbedAuthorBuilder()
+				{
+					IconUrl = "https://cdn.discordapp.com/emojis/346458871893590017.png",
+					Name = "Error"
+				},
+				Description = $"{Program.Client.CurrentUser.Username} encountered an error while processing your request. Here's the info:"
+			};
+
+			embed.AddField(title, message, true);
+			return embed;
         }
+
+		public static EmbedBuilder ErrorEmbedCreator(Exception ex)
+		{
+			EmbedBuilder embed = new EmbedBuilder()
+			{
+				Color = new Discord.Color(240, 71, 71),
+				Author = new EmbedAuthorBuilder()
+				{
+					IconUrl = "https://cdn.discordapp.com/emojis/346458871893590017.png",
+					Name = "Error"
+				},
+				Description = $"{Program.Client.CurrentUser.Username} encountered an internal error while processing your request. Here's the info:"
+			};
+
+			embed.AddField(ex.GetType().Name, ex.Message, true);
+			return embed;
+		}
 		/// <summary>
 		/// Convenience method that writes the specified message to the console with a specified color. Resets color to default when done.
 		/// </summary>

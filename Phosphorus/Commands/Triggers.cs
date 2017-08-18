@@ -13,7 +13,7 @@ namespace Phosphorus
             {
                 Key = "cunt",
                 Response = "r00d {user}",
-                SearchType = TriggerSearchType.Contains
+                SearchType = TriggerSearchType.Contains	
             };
             Trigger BrandonsPhoneNumberTrigger = new Trigger()
             {
@@ -43,10 +43,10 @@ namespace Phosphorus
 			Trigger HotStringTrigger = new Trigger()
 			{
 				Key = "hot string",
-				Response = "```hot```",
+				Response = @"```css
+""hot""```",
 				SearchType = TriggerSearchType.FullMessage
 			};
-
 		}
 	}
 }

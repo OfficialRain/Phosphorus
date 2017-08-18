@@ -94,13 +94,13 @@ namespace Phosphorus
 	
             return users;
         }
+
 		/// <summary>
 		/// Advanced guild search.
 		/// </summary>
 		/// <param name="identifiers">List of strings to query in the guild database.</param>
 		/// <param name="exact"> If set to true, only the first match will be returned. </param>
 		/// <returns>Returns a list of <see cref="IGuild"/>.</returns>
-
 		public static List<IGuild> GetGuild(List<string> identifiers, bool exact)
         {
             List<IGuild> guilds = new List<IGuild>();

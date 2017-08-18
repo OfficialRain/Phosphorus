@@ -47,8 +47,8 @@ namespace Phosphorus
                 }
                 catch (Exception ex)
                 {
-                    await context.Channel.SendMessageAsync("", embed: ErrorEmbedCreator(ex.Message, ex.GetType().ToString()));
-                    await new Program().Logger(new LogMessage(LogSeverity.Warning, $"Exception during execution of DiscordCommand \"{commandName}\"", ex.Message + Environment.NewLine + ex.StackTrace, ex));
+                    await context.Channel.SendMessageAsync("", embed: ErrorEmbedCreator(ex));
+                    await new Program().Logger(new LogMessage(LogSeverity.Warning, $"Exception during execution of DiscordCommand \"{commandName}\"", ex.Message, ex));
                 }
             }
         }

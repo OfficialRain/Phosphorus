@@ -121,7 +121,7 @@ namespace Phosphorus
             {
                 Aliases = new List<string>() { "setgame" },
                 Usage = new List<Usage>() { new Usage() { Name = "streaming or playing", ParameterType = ParameterType.Required }, new Usage() { Name = "game name", ParameterType = ParameterType.Required }, new Usage() { Name = "stream link", ParameterType = ParameterType.Optional } },
-                Category = "Misc.",
+                Category = "Bot Account",
                 Description = $"Sets the playing status of {Program.Client.CurrentUser.Username}.",
                 Code = new Func<string, string[], Task>(async (context, args) =>
 				{
@@ -171,7 +171,7 @@ namespace Phosphorus
             {
                 Aliases = new List<string>() { "setstatus" },
                 Usage = new List<Usage>() { new Usage() { Name = "status", ParameterType = ParameterType.Required } },
-                Category = "Misc.",
+                Category = "Bot Account",
                 Description = $"Sets the status of {Program.Client.CurrentUser.Username} - online, idle, dnd, and offline",
                 Code = new Func<string, string[], Task>(async (context, args) =>
                 {
@@ -214,7 +214,28 @@ namespace Phosphorus
                 })
             };
 
-            ConsoleCommand Help = new ConsoleCommand()
+			ConsoleCommand SetUsername = new ConsoleCommand()
+			{
+				Aliases = new List<string>() { "setusername" },
+				Usage = new List<Usage>() { new Usage() { Name = "status", ParameterType = ParameterType.Required } },
+				Category = "Bot Account",
+				Description = $"Sets the status of {Program.Client.CurrentUser.Username} - online, idle, dnd, and offline",
+				Code = new Func<string, string[], Task>(async (context, args) =>
+				{
+					if (args.Count() > 0)
+					{
+						await Program.Client.CurrentUser.ModifyAsync(x => x.Username = args[0]);
+						Tools.WriteLineWithColor($"Username has been succesfully set to \"{args[0]}\".", ConsoleColor.Green);
+					}
+					else
+					{
+						Tools.WriteLineWithColor("Please type in a username to change the account to.", ConsoleColor.Yellow);
+					}
+				})
+			};
+
+
+			ConsoleCommand Help = new ConsoleCommand()
             {
                 Aliases = new List<string>() { "help", "halp" },
                 Usage = new List<Usage>() { new Usage() { Name = "command", ParameterType = ParameterType.Optional } },
@@ -289,6 +310,33 @@ namespace Phosphorus
                     }
                 })
             };
-        }
-    }
+
+			ConsoleCommand Find = new ConsoleCommand()
+			{
+				Aliases = new List<string>() { "find", "search" },
+				Usage = new List<Usage>() { new Usage() { Name = "query", ParameterType = ParameterType.Required } },
+				Category = "Search",
+				Description = "Queries a cross-server list of users with a specified search term.",
+				Code = new Func<string, string[], Task>(async (context, args) =>
+				{
+					var users = Tools.GetUser(new List<string>() { args[0] }, false, false, new KeyValuePair<bool, SocketGuild>(false, null));
+					StringBuilder sb = new StringBuilder();
+					int i = 0;
+					foreach (var user in users)
+					{
+						sb.Append($"{user.Username}#{user.Discriminator}{Environment.NewLine}");
+						i++;
+						if (i >= 15)
+						{
+							sb.Append($"{(users.Count - 15).ToString()} more results - please narrow your query.");
+							break;
+						}
+					}
+
+					Console.WriteLine(sb.ToString());
+				})
+			};
+
+		}
+	}
 }

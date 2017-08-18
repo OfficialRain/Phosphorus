@@ -181,8 +181,6 @@ namespace Phosphorus
 		public static List<ManageInstance> ManageInstances = new List<ManageInstance>();
 		/// <summary> Global prefix for DiscordCommands. </summary>
 		public const string Prefix = "p."; //there will be a system to change this later once i implement a TUI
-		/// <summary> Time of application launch. </summary>
-		public static DateTime StartTime = DateTime.Now; //used for getting the uptime
 		/// <summary> Average color of the current user's profile picture. Used in embeds where a user color is not applicable. </summary>
 		public static Discord.Color PhosphorusColor = new Discord.Color(0, 0, 0);
 	}
