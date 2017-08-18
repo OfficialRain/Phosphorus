@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using NinjaNye.SearchExtensions;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
