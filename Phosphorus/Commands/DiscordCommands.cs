@@ -27,7 +27,7 @@ namespace Phosphorus
 				Usage = new List<Usage>(),
 				Category = "Misc.",
 				Description = "Checks to see if the bot is online.",
-				PermissionLevel = PermissionLevel.User,
+				Permissions = new List<GuildPermission>(),
                 Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
                 {
                     string[] pings = new string[] { "I am alive.", "Turtle'o'bot is my friend!", "JXBot is the best!", "Do you like cheese? 🧀", "Remember PhosphorusVB?", "Thanks for playing pong with me!", "Dab on them haters!", "What if haters dab back?", "`IndexOutOfRangeExcepti`- just kidding." };
@@ -55,7 +55,7 @@ namespace Phosphorus
                 Usage = new List<Usage>() { new Usage() { Name = "command", ParameterType = ParameterType.Optional } },
                 Category = "Misc.",
                 Description = "Lists the possible Discord commands.",
-				PermissionLevel = PermissionLevel.User,
+				Permissions = new List<GuildPermission>(),
 				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
                 {
                     if (args.Count() == 0)
@@ -126,7 +126,7 @@ namespace Phosphorus
                                     },
                                     Title = sb.ToString(),
 									Color = Config.PhosphorusColor,
-                                    Description = $"**Description:** {command.Description}{Environment.NewLine}**Category:** {command.Category}{Environment.NewLine}**Permission Level:** {command.PermissionLevel.ToString()}{Environment.NewLine}**Usage:** `<p.{command.Aliases[0]}>` {sb2.ToString()}",
+                                    Description = $"**Description:** {command.Description}{Environment.NewLine}**Category:** {command.Category}{Environment.NewLine}**Permission Level:** {command.Permissions.ToString()}{Environment.NewLine}**Usage:** `<p.{command.Aliases[0]}>` {sb2.ToString()}",
                                     Footer = new EmbedFooterBuilder()
                                     {
                                         Text = "<required parameter> [optional parameter]"
@@ -149,7 +149,7 @@ namespace Phosphorus
                 Usage = new List<Usage>() { new Usage() { Name = "user", ParameterType = ParameterType.Infinite } },
                 Category = "User",
                 Description = "Gets the avatar of a user.",
-				PermissionLevel = PermissionLevel.User,
+				Permissions = new List<GuildPermission>(),
 				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
                 {
 					var users = Tools.GetUser(args.ToList(), false, true, new KeyValuePair<bool, SocketGuild>(true, null));
@@ -180,30 +180,37 @@ namespace Phosphorus
 				Usage = new List<Usage>() { new Usage() { Name = "exit code", ParameterType = ParameterType.Optional} },
 				Category = "Owner.",
 				Description = "Shuts down the bot.",
-				PermissionLevel = PermissionLevel.ApplicationOwner,
+				Permissions = new List<GuildPermission>(),
 				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
 				{
-					if(args.Count() > 0)
+					if(context.User.Id == (await context.Client.GetApplicationInfoAsync()).Id)
 					{
-						try
+						if (args.Count() > 0)
 						{
-							await context.Channel.SendMessageAsync($"Shutting down with exit code {args[0]}...");
-							await context.Client.SetStatusAsync(UserStatus.Invisible);
-							Environment.Exit(Convert.ToInt32(args[0]));
+							try
+							{
+								await context.Channel.SendMessageAsync($"Shutting down with exit code {args[0]}...");
+								await context.Client.SetStatusAsync(UserStatus.Invisible);
+								Environment.Exit(Convert.ToInt32(args[0]));
+							}
+							catch (FormatException)
+							{
+								await context.Channel.SendMessageAsync("", embed: Tools.ErrorEmbedCreator("Invalid exit code", $"{args[0]} isn't a valid application exit code. Please try again with a number."));
+								return;
+							}
 						}
-						catch(FormatException)
+						else
 						{
-							await context.Channel.SendMessageAsync("", embed:Tools.ErrorEmbedCreator("Invalid exit code", $"{args[0]} isn't a valid application exit code. Please try again with a number."));
-							return;
+							await context.Channel.SendMessageAsync($"Shutting down with exit code 0...");
+							await context.Client.SetStatusAsync(UserStatus.Invisible);
+							Environment.Exit(0);
 						}
 					}
 					else
 					{
-						await context.Channel.SendMessageAsync($"Shutting down with exit code 0...");
-						await context.Client.SetStatusAsync(UserStatus.Invisible);
-						Environment.Exit(0);
+						await context.Channel.SendMessageAsync("", embed: Tools.ErrorEmbedCreator("Not enough permission", "You do not have the permission to execute this command."));
+						return;
 					}
-
 					await context.Channel.SendMessageAsync("", embed: Tools.ErrorEmbedCreator("Could not shut down", $"For some bizarre reason the bot cannot be shut down at this time."));
 				})
 			};
@@ -214,7 +221,7 @@ namespace Phosphorus
 				Usage = new List<Usage>() { new Usage() { Name = "user", ParameterType = ParameterType.Infinite } },
 				Category = "Staff",
 				Description = "Manages users.",
-				PermissionLevel = PermissionLevel.Mod,
+				Permissions = new List<GuildPermission>() { GuildPermission.ManageNicknames, GuildPermission.ManageRoles, GuildPermission.KickMembers, GuildPermission.BanMembers },
 				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
 				{
 					var users = Tools.GetUser(args.ToList(), false, true, new KeyValuePair<bool, SocketGuild>(true, context.Guild));
@@ -241,7 +248,7 @@ namespace Phosphorus
 					}
 					if(sb.ToString() == string.Empty)
 					{
-						await context.Channel.SendMessageAsync("No action of mine is allowed by my permissions. Cancelling action.");
+						await context.Channel.SendMessageAsync($"{context.Client.CurrentUser.Username} does nto have permissions on this server to manage a user. Cancelling action.");
 						return;
 					}
 					sb.Append("`cancel` ");
@@ -348,7 +355,7 @@ namespace Phosphorus
 				Usage = new List<Usage>() { new Usage() { Name = "query", ParameterType = ParameterType.Required } },
 				Category = "Staff",
 				Description = "Queries a cross-server list of users with a specified search term.",
-				PermissionLevel = PermissionLevel.Mod,
+				Permissions = new List<GuildPermission>(),
 				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
 				{
 					var users = Tools.GetUser(new List<string>() { args[0] }, false, false, new KeyValuePair<bool, SocketGuild>(false, null));
@@ -387,13 +394,13 @@ namespace Phosphorus
 				Usage = new List<Usage>() { new Usage() { Name = "messages to delete", ParameterType = ParameterType.Required } },
 				Category = "Staff",
 				Description = "Deletes a certain amount of messages.",
-				PermissionLevel = PermissionLevel.Mod,
+				Permissions = new List<GuildPermission>() { GuildPermission.ManageMessages },
 				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
 				{
 					try
 					{
-						await context.Channel.DeleteMessagesAsync(await context.Channel.GetMessagesAsync(Convert.ToInt32(args[0])).Flatten());
-						await context.Channel.SendMessageAsync($"<:checkmark:348180546519564293> Deleted { args[0]} messages.");
+						await context.Channel.DeleteMessagesAsync(await context.Channel.GetMessagesAsync(Convert.ToInt32(args[0]) + 1).Flatten());
+						await context.Channel.SendMessageAsync($"<:checkmark:348180546519564293> Deleted {args[0]} messages.");
 					}
 					catch (FormatException)
 					{
@@ -408,7 +415,7 @@ namespace Phosphorus
 				Usage = new List<Usage>(),
 				Category = "Misc.",
 				Description = $"Returns various info about the runtime of {Program.Client.CurrentUser.Username}.",
-				PermissionLevel = PermissionLevel.User,
+				Permissions = new List<GuildPermission>(),
 				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
 				{
 					Process currentProcess = Process.GetCurrentProcess();
@@ -424,6 +431,20 @@ namespace Phosphorus
 					await context.Channel.SendMessageAsync("", embed: embed);
 				})
 			};
+
+			DiscordCommand Throw = new DiscordCommand()
+			{
+				Aliases = new List<string>() { "throw" },
+				Usage = new List<Usage>(),
+				Category = "Debug",
+				Description = "Throws an exception..",
+				Permissions = new List<GuildPermission>(),
+				Code = new Func<SocketCommandContext, string[], Task>(async (context, args) =>
+				{
+					context.Channel.SendMessageAsync(args[0]);
+				})
+			};
+
 		}
 	}
 }

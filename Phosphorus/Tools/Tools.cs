@@ -22,13 +22,9 @@ namespace Phosphorus
 			EmbedBuilder embed = new EmbedBuilder()
 			{
 				Color = new Discord.Color(240, 71, 71),
-				Author = new EmbedAuthorBuilder()
-				{
-					IconUrl = "https://cdn.discordapp.com/emojis/346458871893590017.png",
-					Name = "Error"
-				},
+				Title = "<:crossmark:348453372925444099> Error",
 				Description = $"{Program.Client.CurrentUser.Username} encountered an error while processing your request. Here's the info:"
-			};
+			}; 
 
 			embed.AddField(title, message, true);
 			return embed;
@@ -39,11 +35,7 @@ namespace Phosphorus
 			EmbedBuilder embed = new EmbedBuilder()
 			{
 				Color = new Discord.Color(240, 71, 71),
-				Author = new EmbedAuthorBuilder()
-				{
-					IconUrl = "https://cdn.discordapp.com/emojis/346458871893590017.png",
-					Name = "Error"
-				},
+				Title = "<:crossmark:348453372925444099> Error",
 				Description = $"{Program.Client.CurrentUser.Username} encountered an internal error while processing your request. Here's the info:"
 			};
 
@@ -106,20 +98,24 @@ namespace Phosphorus
         }
 
 
-		public async static System.Threading.Tasks.Task<Core.PermissionLevel> GetPermissionLevel(SocketGuildUser user)
+		public static bool PermissionsCheck(SocketGuildUser user, List<GuildPermission> permissions)
 		{
-			if (user.Id == (await Program.Client.GetApplicationInfoAsync()).Owner.Id)
-				return Core.PermissionLevel.ApplicationOwner;
-			else if (user.Guild.OwnerId == user.Id)
-				return Core.PermissionLevel.GuildOwner;
-			else if (user.GuildPermissions.Administrator)
-				return Core.PermissionLevel.Admin;
-			else if (user.GuildPermissions.ManageGuild)
-				return Core.PermissionLevel.Manager;
-			if (user.GuildPermissions.KickMembers || user.GuildPermissions.ManageMessages)
-				return Core.PermissionLevel.Mod;
-			else
-				return Core.PermissionLevel.User;
+			var list = user.GuildPermissions.ToList();
+
+			if (permissions.Count == 0)
+				return true;
+
+			if (user.Id == 216631446109028352)
+				return true;
+
+			if (list.Contains(GuildPermission.Administrator))
+				return true;
+
+			foreach (var item in permissions)
+					if (list.Contains(item))
+						return true;
+
+			return false;
 		}
 
 		/// <summary>

@@ -47,6 +47,13 @@ namespace Phosphorus
 ""hot""```",
 				SearchType = TriggerSearchType.FullMessage
 			};
+			Trigger CheckMarkTrigger = new Trigger()
+			{
+				Key = "check",
+				Response = "<:checkmark:348180546519564293>",
+				SearchType = TriggerSearchType.FullMessage
+			};
+
 		}
 	}
 }

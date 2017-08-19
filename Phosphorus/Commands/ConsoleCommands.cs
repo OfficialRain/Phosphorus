@@ -234,7 +234,6 @@ namespace Phosphorus
 				})
 			};
 
-
 			ConsoleCommand Help = new ConsoleCommand()
             {
                 Aliases = new List<string>() { "help", "halp" },

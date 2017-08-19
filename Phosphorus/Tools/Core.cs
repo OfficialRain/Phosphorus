@@ -27,7 +27,7 @@ namespace Phosphorus
 			/// <summary> <see cref="List{Usage}"/> that dictates what parameters the command accets. Used in the help dialog (and possibly in the future to pass directly into the command?). </summary>
 			public List<Usage> Usage { get; set; }
 			/// <summary> Permisson level of the command required to execute it. </summary>
-			public PermissionLevel PermissionLevel { get; set; }
+			public List<Discord.GuildPermission> Permissions { get; set; }
 			/// <summary> Code for the command to be invoked. </summary>
 			public Func<Discord.Commands.SocketCommandContext, string[], Task> Code { get; set; }
         }
@@ -143,7 +143,7 @@ namespace Phosphorus
 			public string Key { get; set; }
 			/// <summary> Response to when the trigger is invoked. </summary>
 			public string Response { get; set; }
-			/// <summary> <see cref="TriggerSearchType"/> that dictates whether a portion or the full message should invoke the trigger. </summary>
+			/// <summary> Dictates whether a portion or the full message should invoke the trigger. </summary>
 			public TriggerSearchType SearchType { get; set; }
         }
 
@@ -153,15 +153,14 @@ namespace Phosphorus
         public static void Initialize()
         {
             DiscordCommands.InitializeDiscordCommands();
-            ConsoleCommands.InitializeConsoleCommands();
+            ConsoleCommands.InitializeConsoleCommands();	
             Triggers.InitializeTriggers();
         }
 
 		/// <summary> Defines whether a <see cref="Usage"/> is required and whether it supports bulk action.</summary>
 		public enum ParameterType { Required, Optional, Infinite, InfiniteOptional }
-		/// <summary>	 a permission level for .</summary
-		public enum PermissionLevel { User, Mod, Manager, Admin, GuildOwner, ApplicationOwner } //i don't really like the int based system of Phosphorus 2, and enums are always cool
-        public enum TriggerSearchType { FullMessage, Contains }
+		/// <summary> Describes how a <see cref="Trigger"/> should search for invoke.</summary
+		public enum TriggerSearchType { FullMessage, Contains }
     }
 		
 	/// <summary>
@@ -184,4 +183,4 @@ namespace Phosphorus
 		/// <summary> Average color of the current user's profile picture. Used in embeds where a user color is not applicable. </summary>
 		public static Discord.Color PhosphorusColor = new Discord.Color(0, 0, 0);
 	}
-}	
+}

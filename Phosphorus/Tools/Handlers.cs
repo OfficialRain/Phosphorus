@@ -31,7 +31,7 @@ namespace Phosphorus
                     var command = Config.DiscordCommands.FirstOrDefault(x => x.Aliases.Contains(commandName));
                     if (command != null)
                     {
-						if(command.PermissionLevel <= await GetPermissionLevel(message.Author as SocketGuildUser))
+						if(PermissionsCheck(message.Author as SocketGuildUser, command.Permissions))
 						{
 							await command.Code.Invoke(context, GetArgs(message.Content));
 						}	
